@@ -1,0 +1,697 @@
+--[[getgenv().OxideSettings = {
+Refit = true,
+noclip = true,
+FlingEnabled = false,
+ToolFling = false, -- false = holding, true = fling
+AntiFling = false,
+Legacy = false,
+Scale = 1,
+ClientHats = {},
+CustomHats = false, -- Enable or disable custom rig feature (basically old oxide when false)
+CH = {},
+}]]
+
+if OxideSettings == nil then
+getgenv().OxideSettings = {}
+end
+if OxideSettings.CH == nil then
+OxideSettings.CH = {}
+end
+for i,v in pairs(_G) do
+OxideSettings[i] = v
+end
+
+OxideSettings.TransparentRig = true
+OxideSettings.ClickFling = true
+OxideSettings.TeleportCharacter = true
+OxideSettings.HatCollide = false
+OxideSettings.HideCharacter = true
+if OxideSettings.Legacy == nil then
+OxideSettings.Legacy = false
+end
+if OxideSettings.ClientHats == nil then
+OxideSettings.ClientHats = {}
+end
+if OxideSettings.Scale == nil then
+OxideSettings.Scale = 1
+end
+if OxideSettings.CH.Head == nil then
+OxideSettings.CH.Head = {}
+end
+if OxideSettings.CH.Head.Name == nil then
+OxideSettings.CH.Head.Name = "wtfgangimgonnakms!"
+end
+local str = game:GetService("SharedTableRegistry")
+if not getgenv then
+local getgenv = function()
+return _G
+end
+end
+local connect
+local velocity
+local removedl
+local char
+local function transparent()
+for _, child in pairs(char:GetChildren()) do
+local v = child
+if child:IsA("BasePart") and not v:IsA("Model") and v.Name == "Torso" or child:IsA("BasePart") and v.Name == "Right Arm" or child:IsA("BasePart") and v.Name == "Left Arm" or child:IsA("BasePart") and v.Name == "Right Leg" or child:IsA("BasePart") and v.Name == "Left Leg" then
+if OxideSettings.TransparentRig == true then
+child.Transparency = .5
+else
+child.Transparency = 1
+end
+elseif child:IsA("Accessory") and v.Name ~= "Black" then
+if OxideSettings.TransparentRig == true then
+child.Handle.Transparency = .5
+else
+child.Handle.Transparency = 1
+end
+end
+end
+end
+local curcamcf
+local function respawnfunc()
+curcamcf = workspace.CurrentCamera.CFrame
+replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
+task.wait(game:GetService("Players").RespawnTime)
+connect:Disconnect()
+velocity:Disconnect()
+removedl:Disconnect()
+transparent()
+end
+local flingpos = game:GetService("Players").LocalPlayer:GetMouse().Hit
+local flingpart = game:GetService("Players").LocalPlayer:GetMouse().Target
+local flingplr = nil
+local sineee=os.clock()
+local sine=os.clock()
+local plr =game:GetService("Players").LocalPlayer
+local lp = plr
+local cf
+local lastcf = workspace.CurrentCamera.CFrame
+local oldh = workspace.FallenPartsDestroyHeight
+local tools = {}
+local faketools = {}
+local stopped = false
+local moveloop
+local respawnloop
+OxideSettings.Stopped = false
+OxideSettings.SBV4R = false
+OxideSettings.R6Mode = false
+OxideSettings.MiztCompat = true
+OxideSettings.Fling = false
+game:GetService("StarterGui"):SetCore("SendNotification", {
+Title = "Oxide Reanimation V3.7 ";
+Duration = 20;
+Text = "This script was made by Hemi"
+})
+local function cfAdd(a,b) return a+b end
+local Hat = {
+Rename = function(HatID, NAME, oname)
+pcall(function()
+if oname == nil then oname = "Hat" end
+for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
+if v:IsA("Accessory") then
+if game:GetService("Players").LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then
+if v:WaitForChild("Handle"):FindFirstChildWhichIsA("SpecialMesh").TextureId == HatID then
+if oname == "Hat" then
+v.Name = NAME
+elseif oname == "LARM" then
+v.Name = "fooblet"
+elseif oname == "RARM" then
+v.Name = "gooblet"
+else
+v.Name = NAME
+end
+end
+elseif game:GetService("Players").LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and v.Handle.TextureId == HatID then
+if oname == "Hat" then
+v.Name = NAME
+elseif oname == "LARM" then
+v.Name = "fooblet"
+elseif oname == "RARM" then
+v.Name = "gooblet"
+else
+v.Name = NAME
+end
+elseif game:GetService("Players").LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+if v.Handle.TextureID == HatID then
+if oname == "Hat" then
+v.Name = NAME
+elseif oname == "LARM" then
+v.Name = "fooblet"
+elseif oname == "RARM" then
+v.Name = "gooblet"
+else
+v.Name = NAME
+end
+end
+end
+end
+end
+end)
+end,
+Rename2 = function(HatID, NAME,rname, oname)
+pcall(function()
+if oname == nil then oname = "Hat" end
+for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
+if v:IsA("Accessory") then
+if game:GetService("Players").LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then
+if v:WaitForChild("Handle"):FindFirstChildWhichIsA("SpecialMesh").TextureId == HatID then
+if v.Name == rname then
+if oname == "Hat" then
+v.Name = NAME
+elseif oname == "LARM" then
+v.Name = "fooblet"
+elseif oname == "RARM" then
+v.Name = "gooblet"
+else
+v.Name = NAME
+end
+end
+end
+elseif game:GetService("Players").LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and v.Handle.TextureId == HatID then
+if v.Name == rname then
+if oname == "Hat" then
+v.Name = NAME
+elseif oname == "LARM" then
+v.Name = "fooblet"
+elseif oname == "RARM" then
+v.Name = "gooblet"
+else
+v.Name = NAME
+end
+end
+elseif game:GetService("Players").LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+if v:WaitForChild("Handle").TextureID == HatID then
+if v.Name == rname then
+if oname == "Hat" then
+v.Name = NAME
+elseif oname == "LARM" then
+v.Name = "fooblet"
+elseif oname == "RARM" then
+v.Name = "gooblet"
+else
+v.Name = NAME
+end
+end
+end
+end
+end
+end
+end)
+end,}
+local function redo()
+local gay = true -- dont edit >:(
+hmode = nil
+if gay == true then
+hmode = "norm"
+else
+hmode = "alsoo3" -- hate this guy
+end
+--game:GetService("Workspace")["Error_30363"].EyesOfTheEverWorld.Name = "Puffer Vest"
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/OxideReanim/main/stuff2"))()
+local c = game:GetService("Players").LocalPlayer.Character
+if not workspace:FindFirstChild("non") then
+if OxideSettings.Legacy == false then
+char = game:GetObjects("rbxassetid://140589790135981")[1]
+else
+char = game:GetService("Players"):CreateHumanoidModelFromDescription(game:GetService("Players"):GetHumanoidDescriptionFromUserId(game:GetService("Players").LocalPlayer.UserId),Enum.HumanoidRigType.R6)
+for i,v in pairs(char:GetChildren()) do
+if v:IsA("Accessory") then
+v:Destroy()
+end
+end
+for i,v in pairs(char:GetDescendants()) do
+if v:IsA("BasePart") then
+v.Transparency = 1
+elseif v:IsA("Decal") then
+v.Transparency = 1
+end
+end
+end
+else
+char = workspace.non
+end
+
+_G.OxideFakeChar = char
+getgenv().OxideFakeChar = char
+getgenv().OxideRealChar = c
+local hum = char:FindFirstChildOfClass("Humanoid")
+hum.DisplayDistanceType = 2
+if OxideSettings.MiztCompat == false then
+char.Name = c.Name.." (Dummy)"
+else
+char.Name = "non"
+end
+zz = Instance.new("Highlight",char)
+zz.FillTransparency = 1
+zz.DepthMode = Enum.HighlightDepthMode.Occluded
+zz.Enabled = false
+char.PrimaryPart = char['HumanoidRootPart']
+if not workspace:FindFirstChild("non") then
+char:SetPrimaryPartCFrame(c.HumanoidRootPart.CFrame *CFrame.new(0,0,2))
+end
+c["Body Colors"]:Clone().Parent = char
+game:GetService("Players").LocalPlayer.Character.PrimaryPart = c.Head
+char.HumanoidRootPart.Anchored = false
+for i,v in pairs(c:GetChildren()) do
+if v:IsA("Accessory") and v.Name == "Pants" then
+v:Destroy()
+end
+end
+char.Parent = workspace
+c.Parent = char
+for i,v in pairs(OxideSettings.ClientHats) do
+local hat = game:GetService("InsertService"):LoadLocalAsset("rbxassetid://"..v)
+hat.Parent = char
+hat.Handle.CanCollide = false
+OxideSettings.ClientHats[i] = hat.Name
+w = Instance.new("Weld",hat.Handle)
+w.C0 = w.Parent:FindFirstChildOfClass("Attachment").CFrame
+w.Name = "AccessoryWeld"
+w.Part0 = hat.Handle
+a = w.Parent:FindFirstChildOfClass("Attachment")
+if string.find(a.Name,"Left") then
+if string.find(a.Name,"Shoulder") then
+w.Part1 = char["Left Arm"]
+w.C1 = char["Left Arm"].LeftShoulderAttachment.CFrame
+end
+elseif string.find(a.Name,"Right") then
+if string.find(a.Name,"Shoulder") then
+w.Part1 = char["Right Arm"]
+w.C1 = char["Right Arm"].RightShoulderAttachment.CFrame;
+end
+elseif string.find(a.Name,"Left") then
+if string.find(a.Name,"Foot") then
+w.Part1 = char["Left Leg"]
+w.C1 = char["Left Leg"].LeftFootAttachment.CFrame
+end
+elseif string.find(a.Name,"Right") then
+if string.find(a.Name,"Foot") then
+w.Part1 = char["Right Leg"]
+w.C1 = char["Right Leg"].RightFootAttachment.CFrame
+end
+elseif string.find(a.Name,"Waist") then
+if string.find(a.Name,"Back") then
+w.Part1 = char["Torso"]
+w.C1 = char["Torso"].WaistBackAttachment.CFrame
+end
+elseif string.find(a.Name,"Body") then
+if string.find(a.Name,"Back") then
+w.Part1 = char["Torso"]
+w.C1 = char["Torso"].BodyBackAttachment.CFrame
+elseif string.find(a.Name,"Front") then
+w.Part1 = char["Torso"]
+w.C1 = char["Torso"].BodyFrontAttachment.CFrame
+end
+elseif string.find(a.Name,"Hat") then
+w.Part1 = char["Head"]
+w.C1 = char["Head"].HatAttachment.CFrame
+elseif string.find(a.Name,"FaceFront") then
+w.Part1 = char["Head"]
+w.C1 = char["Head"].FaceFrontAttachment.CFrame
+elseif string.find(a.Name,"FaceCenter") then
+w.Part1 = char["Head"]
+w.C1 = char["Head"].FaceCenterAttachment.CFrame
+elseif string.find(a.Name,"Neck") then
+w.Part1 = char["Torso"]
+w.C1 = char["Torso"].NeckAttachment.CFrame
+elseif string.find(a.Name,"Hair") then
+w.Part1 = char["Head"]
+w.C1 = char["Head"].HairAttachment.CFrame
+end
+end
+task.spawn(function()
+
+print("Oxide reanimation running...")
+end)
+
+redo() -- Call the redo function from Oxide
+
+
+if _G.UhhhhhhLoaded then return end
+_G.UhhhhhhLoaded = true
+
+local UhhhhhhVersion = "1.0.4 BETA"
+
+cloneref = cloneref or function(o) return o end
+getcustomasset = getcustomasset or getsynasset
+gethiddengui = get_hidden_gui or gethui
+
+-- restore
+pcall(restorefunction, restorefunction)
+pcall(restorefunction, sethiddenproperty)
+pcall(restorefunction, replicatesignal)
+
+local Debris = cloneref(game:GetService("Debris"))
+local CoreGui = cloneref(game:GetService("CoreGui"))
+local Players = cloneref(game:GetService("Players"))
+local RunService = cloneref(game:GetService("RunService"))
+local StarterGui = cloneref(game:GetService("StarterGui"))
+local GuiService = cloneref(game:GetService("GuiService"))
+local HttpService = cloneref(game:GetService("HttpService"))
+local TextService = cloneref(game:GetService("TextService"))
+local TweenService = cloneref(game:GetService("TweenService"))
+local TextChatService = cloneref(game:GetService("TextChatService"))
+local UserInputService = cloneref(game:GetService("UserInputService"))
+local ContextActionService = cloneref(game:GetService("ContextActionService"))
+
+local Util = {}
+
+Util.RandomString = function(length)
+length = length or math.random(32, 256)
+local str = ""
+for _=1, length do
+str ..= string.char(math.random(32, 126))
+end
+return str
+end
+Util.DeepcopyTable = function(t)
+local c = {}
+for k, v in pairs(t) do
+if type(v) == "table" then
+v = Util.DeepcopyTable(v)
+end
+c[k] = v
+end
+return c
+end
+Util.Notify = function(text)
+StarterGui:SetCore("SendNotification", {
+Title = "Uhhhhhh",
+Text = text,
+Duration = 5
+})
+end
+
+do
+local function diefatal()
+Util.Notify("Executor not supported.")
+_G.UhhhhhhLoaded = nil
+error("fatal error cant start")
+end
+if not request then
+diefatal()
+end
+if not getcustomasset then
+diefatal()
+end
+if not (readfile and writefile and delfile and isfile and isfolder and makefolder and listfiles) then
+diefatal()
+end
+if not firetouchinterest then
+diefatal()
+end
+if not replicatesignal then
+diefatal()
+end
+if not sethiddenproperty then
+diefatal()
+end
+if not hookmetamethod and not hookfunction then
+diefatal()
+end
+local loadstringreturn = false
+local val = math.random(-65536, 65536)
+local _, func = pcall(loadstring, "return " .. val)
+if func then
+local s, val2 = pcall(func)
+if s and val == val2 then
+loadstringreturn = true
+end
+end
+if not loadstringreturn then
+diefatal()
+end
+if isfile then
+local s, e = pcall(isfile, Util.RandomString(32))
+if s and e then
+-- stupid executor
+isfile = function(path)
+local s, e = pcall(readfile, path)
+return not not (s and e)
+end
+end
+else
+diefatal()
+end
+end
+
+b_getfenv = getfenv -- "loadstring marks the env unsafe"
+
+local Player = Players.LocalPlayer
+
+if not game:IsLoaded() then
+local notLoaded = Instance.new("Message")
+xpcall(function()
+notLoaded.Parent = CoreGui
+end, function()
+notLoaded.Parent = workspace
+end)
+notLoaded.Text = "Uhhhhhh is waiting for the game to load"
+game.Loaded:Wait()
+for i=1, 60 do
+while task.wait() > 1 / 10 do end
+end
+notLoaded:Destroy()
+end
+
+local Camera = workspace.CurrentCamera
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+local newCamera = workspace.CurrentCamera
+if newCamera ~= nil then
+Camera = newCamera
+end
+end)
+local _scrsiz = Vector2.new(512, 512)
+Util.GetScreenSize = function()
+if Camera ~= nil then
+_scrsiz = Camera.ViewportSize
+end
+return _scrsiz
+end
+Util.LoopedHSV = function(h, s, v)
+h %= 1
+s = math.clamp(s, 0, 1)
+v = math.clamp(v, 0, 1)
+return Color3.fromHSV(h, s, v)
+end
+Util.Instance = function(cl, p)
+local i = Instance.new(cl)
+i.Name = Util.RandomString()
+i.Parent = p
+return i
+end
+Util.LinkDestroyI2I = function(a, b)
+a.Destroying:Once(function()
+b:Destroy()
+end)
+end
+Util.LinkDestroyI2C = function(a, b)
+a.Destroying:Once(function()
+b:Disconnect()
+end)
+end
+Util.ClearAllChildrenGui = function(a)
+for _,v in a:GetChildren() do
+if v:IsA("GuiObject") then
+v:Destroy()
+end
+end
+end
+Util.GetTransparency = function(part)
+return 1 - (1 - part.Transparency) * (1 - part.LocalTransparencyModifier)
+end
+Util.ScaleCFrame = function(cf, scale)
+return cf + cf.Position * (scale - 1)
+end
+Util.IsGuiVisible = function(guiObject)
+if not guiObject or not guiObject:IsA("GuiObject") then return false end
+while guiObject do
+if not guiObject.Visible then
+return false
+end
+guiObject = guiObject:FindFirstAncestorWhichIsA("GuiObject")
+end
+return true
+end
+Util.UDim2ToVector2Scale = function(x)
+return Vector2.new(x.X.Scale, x.Y.Scale)
+end
+Util.UDim2ToVector2Offset = function(x)
+return Vector2.new(x.X.Offset, x.Y.Offset)
+end
+Util.Vector2ToUDim2Scale = function(x)
+return UDim2.fromScale(x.X, x.Y)
+end
+Util.Vector2ToUDim2Offset = function(x)
+return UDim2.fromOffset(x.X, x.Y)
+end
+Util.QueryPlayerSelector = function(query, excludespeaker)
+if #query == 0 then return end
+query = query:lower()
+local t = {}
+for _,player in Players:GetPlayers() do
+if player ~= Player or not excludespeaker then
+local a = player.DisplayName:lower():find(query)
+local b = player.Name:lower():find(query)
+if a then table.insert(t, {player, 1, a}) end
+if b then table.insert(t, {player, 0, b}) end
+end
+end
+table.sort(t, function(a, b)
+if a[2] == b[2] then
+return a[3] < b[3]
+end
+return a[2] < b[2]
+end)
+if t[1] then
+return t[1][1]
+end
+return nil
+end
+
+local IsUhhhhhhFullyLoaded = false
+
+local SCREENGUI = Util.Instance("ScreenGui")
+SCREENGUI.IgnoreGuiInset = true
+SCREENGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SCREENGUI.ClipToDeviceSafeArea = false
+SCREENGUI.ResetOnSpawn = false
+SCREENGUI.ScreenInsets = Enum.ScreenInsets.None
+SCREENGUI.DisplayOrder = 2147483647
+if gethiddengui then
+SCREENGUI.Parent = gethiddengui()
+else
+SCREENGUI.Parent = CoreGui
+end
+
+local UIMainFrame = Util.Instance("Frame", SCREENGUI)
+UIMainFrame.AnchorPoint = Vector2.new(0, 0)
+UIMainFrame.Position = UDim2.new(0, 0, 0, 0)
+UIMainFrame.Size = UDim2.new(1, 0, 1, 0)
+UIMainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+UIMainFrame.BackgroundTransparency = 1
+UIMainFrame.BorderSizePixel = 0
+UIMainFrame.ZIndex = 2147483647
+
+local SaveData = {}
+do
+pcall(makefolder, "UhhhhhhReanim")
+pcall(writefile, "UhhhhhhReanim/.nomedia", "")
+local SaveDataFilename = "UhhhhhhReanim/tree.ehehetilde"
+local s, data = pcall(readfile, SaveDataFilename)
+if s and data then
+s, data = pcall(HttpService.JSONDecode, HttpService, data)
+if s and data then
+SaveData = data
+else
+pcall(writefile, SaveDataFilename, "{}")
+end
+else
+pcall(writefile, SaveDataFilename, "{}")
+end
+task.spawn(function()
+local odata = nil
+local savefailwarn = false
+while true do
+task.wait()
+local s, data = pcall(HttpService.JSONEncode, HttpService, SaveData)
+if s then
+savefailwarn = false
+odata = odata or data
+if odata ~= data then
+odata = data
+pcall(writefile, SaveDataFilename, data)
+end
+else
+if not savefailwarn then
+Util.Notify("Failed to write tree.ehehetilde (your save file)")
+savefailwarn = true
+end
+end
+end
+end)
+pcall(makefolder, "UhhhhhhReanim/Assets")
+pcall(makefolder, "UhhhhhhReanim/Modules")
+pcall(makefolder, "UhhhhhhReanim/BuiltinModules")
+pcall(makefolder, "UhhhhhhReanim/Content")
+pcall(makefolder, "UhhhhhhReanim/Content/Anims")
+pcall(makefolder, "UhhhhhhReanim/Content/Sounds")
+pcall(makefolder, "UhhhhhhReanim/Content/Images")
+pcall(makefolder, "UhhhhhhReanim/Content/Models")
+pcall(makefolder, "UhhhhhhReanim/Content/Unknown")
+end
+
+do
+local CDNVersion = 2
+local AllFileNames = {
+"dm_afterburner.ft2.mp3",
+"4m_brokenheart.ft2.mp3",
+"dm_change.ft2.mp3",
+"dm_deadscene2024.ft2.mp3",
+"dm_deadscene2024alt.ft2.mp3",
+"dm_e1m777.ft2.mp3",
+"dm_haze.ft2.mp3",
+"dm_haze2.ft2.mp3",
+"dm_iostesso.ft2.mp3",
+"dm_keygen18.ft2.mp3",
+"dm_keygen19.ft2.mp3",
+"dm_keygen20.ft2.mp3",
+"dm_keygen21.ft2.mp3",
+"dm_keygen21alt.ft2.mp3",
+"dm_keygen22.ft2.mp3",
+"dm_keygen23.ft2.mp3",
+"dm_keygen3.ft2.mp3",
+"dm_keygen30.ft2.mp3",
+"dm_keygen31.ft2.mp3",
+"dm_keygen8.ft2.mp3",
+"dm_laparade.ft2.mp3",
+"dm_reztro4.ft2.mp3",
+"dm_robotadventure.ft2.mp3",
+"dm_unaseraariccione.ft2.mp3",
+"fr_keygen31.ft2.mp3",
+"lightinursoul.graphic.png",
+"letriangul.graphic.png",
+}
+local redownloadeverything = SaveData.CDNVersion ~= CDNVersion
+local theresassetsmissing = redownloadeverything
+for _,rfile in AllFileNames do
+local fil = "UhhhhhhReanim/Assets/" .. rfile
+local s, d = pcall(isfile, fil)
+if not (s and d) then
+theresassetsmissing = true
+end
+end
+if theresassetsmissing then
+local downloaded = 0
+local skipped = 0
+local assetsdownload = 0
+local downloadfile = function(meta)
+local fil = "UhhhhhhReanim/Assets/" .. meta.name
+if not redownloadeverything then
+local s, d = pcall(isfile, fil)
+if s and d then
+skipped += 1
+return
+end
+end
+local s, body = pcall(request, {
+Url = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/assets/" .. meta.name,
+Method = "GET"
+})
+if s and body then
+pcall(writefile, fil, body.Body)
+downloaded += 1
+end
+end
+
+print("Uhhhhhh reanimation running...")
+end
+SaveData.CDNVersion = CDNVersion
+end
+
+game:GetService("StarterGui"):SetCore("SendNotification", {
+Title = "Combined Reanimation",
+Duration = 20;
+})                 
